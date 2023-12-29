@@ -10,8 +10,9 @@ import { clientData } from './mockValues';
 import { loadSite } from '../../actions/siteActions';
 import { Cars, logout } from '../reduxDima/Slice';
 import { styles } from '../../styles/customStyles';
-import { carsUser, userCars } from '../users/users';
+import { Usecars, User, auth, userCars } from '../users/users';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { DIAMOND } = IMAGES;
 const VIP_CLIENT = 'VIP Клиент';
@@ -79,9 +80,10 @@ function Dashbord({ navigation }) {
 
   const NameUser = useSelector(state=>state.user.currentUser.name)
   const Anonim = useSelector(state=>state.user.currentUser.email)
-  
- const ploxo = useSelector(state=>state.user.cars)
- console.log(ploxo);
+  const isAuth = useSelector(state=>state.user.isAuth)
+  const user = useSelector(state=>state.user.currentUser)
+ 
+ 
 
 
 
@@ -98,8 +100,12 @@ function Dashbord({ navigation }) {
    
   };
   
-  
-
+  useEffect(()=>{
+    dispatch(auth())
+    if(!isAuth) {
+      AsyncStorage.removeItem('token')
+  }
+  },)
 
 const Tst= ()=> { 
   dispatch(logout())
@@ -110,9 +116,12 @@ const Tst= ()=> {
 
 }
 
-// const test = ()=>{
-// dispatch(userCars(cars))
-// }
+const  text=()=>{
+  Usecars()
+}
+const  us=()=>{
+  User()
+}
 
   return (
     <>
@@ -188,16 +197,14 @@ const Tst= ()=> {
         {selectedSection ? (
           clientCoupenes.map((item, index) => (<CouponeItem key={index} item={item} id={index} />))
         ) : (
-          // todo: update when whoud give sketch
-          // clientCars.map((item, index) => (<View key={index} id={index}><Text>{item.name}</Text></View>))
-          <View style={{width:'auto', justifyContent:'center', alignItems:'center'}} >
-            <TextInput style={{borderWidth:2, borderRadius:15,width:300}} value={cars} onChangeText={setCars} />
-            <Text style={{borderWidth:1, textAlign:'center', width:200, marginTop:20, borderRadius:20,height:30,}}   >Добавить</Text>
-            <View style={styles.name_input} >
-              <Text style={{fontSize:25}} >Какая-то машина</Text>
-              </View>
-          </View>
-        )}
+         
+          //  clientCars.map((item, index) => (<View key={index} id={index}><Text>{item.name}</Text></View>)))
+        <View>
+          <Text onPress={text} >test</Text>
+          <Text onPress={us} >t123</Text>
+        </View>
+          )
+        }
       </View>
     </>
   );

@@ -1,24 +1,29 @@
 
-
+const {Schema, model, ObjectId} = require('mongoose')
 const express = require('express')
 const mongoose = require('mongoose')
 const config = require('config')
 const app = express()
 const PORT = config.get('serverPort')
 const authRouter = require('./routers/auth.routers')
-
+const User = require('./models/User')
+const cors = require('cors')
 app.use(express.json())
 app.use('/api/auth', authRouter)
-
-const start = async ()=>{
+app.use(cors())
+const start = async ()=>{    
 
     try{
         await mongoose.connect(config.get('Url'),{
             useNewUrlParser:true,
-            useUnifiedTopology:true
+            useUnifiedTopology:true,
+            
         })
-        app.get('/',(req,res)=>{
-            res.send('jgjgujgtjg')
+        const users = await User.find({})
+        console.log(users)
+
+        app.get('/logn',(req,res)=>{
+            res.json(users)
         })
 
         app.listen(PORT,()=>{
