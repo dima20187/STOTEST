@@ -3,4 +3,5 @@ export const IMAGES = {
   SMS_PAGE_PICTURE: require('./Picture.png'),
   DIAMOND: require('./diamond.png'),
   LAUNCHE: require('./Launche.jpg'),
+  BLACKDIAMOND:require('./BlackDiamond.png')
 };

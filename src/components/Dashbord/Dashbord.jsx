@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { Alert } from "react-native"
 import { persistStore } from 'redux-persist';
 import { Store } from '../Store/Store';
-import { Text, View, Image, TouchableOpacity, TextInput } from 'react-native';
+import { Text, View, Image, TouchableOpacity, TextInput,StyleSheet } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { dashbordStyles } from '../../styles/DashbordScreenStyles';
 import { IMAGES } from '../../../assets/index';
@@ -10,44 +11,71 @@ import { clientData } from './mockValues';
 import { loadSite } from '../../actions/siteActions';
 import { Cars, logout } from '../reduxDima/Slice';
 import { styles } from '../../styles/customStyles';
-import { Usecars, User, auth, userCars } from '../users/users';
+import { Usecars, User, auth, userCars,UseStock } from '../users/users';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const { DIAMOND } = IMAGES;
+
+const { DIAMOND,BLACKDIAMOND } = IMAGES;
 const VIP_CLIENT = 'VIP Клиент';
+const NOT_VIP = "Клиент"
 const USED = 'использовано';
 
-function CouponeItem({ item: { title, couponeCode, couponeUsageStatus, expirationDate } }) {
+function CouponeItem( ) {
+
+  const [stock,setStock]=useState([])
+
+
+  useEffect(()=>{
+    const UseStock = async ()=>{
+      try{
+        const jsonValue = await AsyncStorage.getItem('token');
+        const response = await axios.get(`http://192.168.0.105:5000/api/auth/stock`,{
+          headers:{Authorization:`Bearer ${jsonValue}`}
+      }
+        )
+      const data = response.data.user.stock
+      setStock(data)
+      console.log(stock);
+      }
+      catch(e){
+  
+          Alert.alert("Внимание! + 1", e.response)
+         
+      }
+  }
+  UseStock()
+  },[])
+
+
+  const stck = useSelector(state=>state.user)
+  
+
+
+
   return (
     <View
       style={{
         marginBottom: 24,
       }}
     >
-      <Text
+{stock.map((sto)=>(
+      <Text 
         style={{
-          fontSize: 16,
-          fontWeight: '600',
-        }}
-      >
-        {title}
-      </Text>
-      <Text
-        style={{
-          fontSize: 30,
+          fontSize: 24,
           fontWeight: '600',
           backgroundColor: '#F6F6F6',
           borderRadius: 7,
           marginTop: 4,
+          marginBottom:10,
           paddingLeft: 10,
           paddingTop: 6,
           paddingBottom: 6,
-          textDecorationLine: couponeUsageStatus ? 'line-through' : 'none',
+          textDecorationLine: sto.is? "none" :"line-through",
         }}
       >
-        {couponeCode}
-      </Text>
+      {sto.name}
+      </Text>))}
       <Text
         style={{
           marginTop: 7,
@@ -57,7 +85,7 @@ function CouponeItem({ item: { title, couponeCode, couponeUsageStatus, expiratio
           color: '#BDBDBD',
         }}
       >
-        {couponeUsageStatus ? USED : expirationDate}
+        {/* {couponeUsageStatus ? USED : expirationDate} */}
       </Text>
       <View
         style={{
@@ -73,41 +101,79 @@ function CouponeItem({ item: { title, couponeCode, couponeUsageStatus, expiratio
 
 function Dashbord({ navigation }) {
   const [selectedSection, SetSelectedSection] = useState(true);
-
-  const [cars,setCars]=useState("")
-
+  
   const { name, clientStatusVip, clientCoupenes, clientCars } = clientData;
+
+  const dispatch = useDispatch()
+  const [stock,setStock]=useState([])
+  const [cars,setCars]=useState([])
 
   const NameUser = useSelector(state=>state.user.currentUser.name)
   const Anonim = useSelector(state=>state.user.currentUser.email)
   const isAuth = useSelector(state=>state.user.isAuth)
-  const user = useSelector(state=>state.user.currentUser)
+  const isVip = useSelector(state=>state.user.currentUser.isVip)
  
- 
+
+
+  useEffect(()=>{
+    const UseStock = async ()=>{
+      try{
+        const jsonValue = await AsyncStorage.getItem('token');
+        const response = await axios.get(`http://192.168.0.105:5000/api/auth/stock`,{
+          headers:{Authorization:`Bearer ${jsonValue}`}
+      })
+      const data = response.data.user.stock
+      setStock(data)
+      console.log(stock);
+      }
+      catch(e){
+          Alert.alert("Внимание! + 1", e.response) 
+      }
+    }
+    UseStock()
+    },[])
 
 
 
+useEffect(()=>{
+  const Usecars = async ()=>{
+    try{
+      const jsonValue = await AsyncStorage.getItem('token');
+      const response = await axios.get(`http://192.168.0.105:5000/api/auth/cars`,{
+        headers:{Authorization:`Bearer ${jsonValue}`}
+    })
+    const data = response.data.user.cars
+    setCars(data)
+    }
+    catch(e){
+        Alert.alert("Внимание! + 1", e.response)   
+        }
+      }
+    Usecars()
+    },[])
 
 
-  // const { filmState } = useSelector((state) => state);
+  useEffect(()=>{
+    if(!AsyncStorage.getItem('token')){
+      dispatch(logout())
+      navigation.navigate("LoginScreen")
+        }
+      })
 
-  // const { dashbordScreen: { filmState } } = useSelector((store) => store);
-
-  const dispatch = useDispatch();
 
   const onClickHandler = () => {
     dispatch(loadSite());
-   
   };
   
   useEffect(()=>{
     dispatch(auth())
     if(!isAuth) {
+      dispatch(logout())
       AsyncStorage.removeItem('token')
-  }
-  },)
+      }
+  },[])
 
-const Tst= ()=> { 
+const LogOut= ()=> { 
   dispatch(logout())
   persistStore(Store).purge()
   setTimeout(()=>{
@@ -119,9 +185,6 @@ const Tst= ()=> {
 const  text=()=>{
   Usecars()
 }
-const  us=()=>{
-  User()
-}
 
   return (
     <>
@@ -131,7 +194,7 @@ const  us=()=>{
       }}
       />
         <TouchableOpacity activeOpacity={0.4} style={styles.view_botton_logout} >
-          <Text style={styles.button_loguot} onPress={Tst} >
+          <Text style={styles.button_loguot} onPress={LogOut} >
             Выход
           </Text>
           </TouchableOpacity>
@@ -155,17 +218,15 @@ const  us=()=>{
         elevation: 20,
       }}
       >
-        <Image style={dashbordStyles.image} source={DIAMOND} />
+        <Image style={dashbordStyles.image} source={isVip? DIAMOND : BLACKDIAMOND} />
       </View>
-      {/* </Shadow> */}
       <View style={dashbordStyles.container}>
         <View
           style={{
             alignItems: 'center',
             justifyContent: 'center',
             width: '100%',
-            // backgroundColor: 'red',
-            // fontFamily: 'Inter',
+
           }}
         >
           <Text
@@ -185,7 +246,7 @@ const  us=()=>{
                 color: '#5DB075',
               }}
             >
-              {VIP_CLIENT}
+              {isVip?VIP_CLIENT:NOT_VIP}
             </Text>
           )}
         </View>
@@ -195,25 +256,51 @@ const  us=()=>{
           onClickHandlerDispatch={onClickHandler}
         />
         {selectedSection ? (
-          clientCoupenes.map((item, index) => (<CouponeItem key={index} item={item} id={index} />))
+        <CouponeItem />
         ) : (
-         
-          //  clientCars.map((item, index) => (<View key={index} id={index}><Text>{item.name}</Text></View>)))
-        <View>
-          <Text onPress={text} >test</Text>
-          <Text onPress={us} >t123</Text>
+
+        <View style={{alignContent:'center',justifyContent:'center'}} >
+        
+             <Text style={{fontSize:30,textAlign:'center'}} >Ваш Автомобиль:</Text>
+          
+{!cars.length ?  (
+      <Text style={{fontSize:25, textAlign:'center',marginTop:'5%'}} >УПС...Какие-то неполадки</Text>
+        ):(
+
+          <View >
+          {cars.map((car,index)=>(
+          <TouchableOpacity key={index} >
+        <Text  style={{marginTop: 16,
+        verticalAlign:"middle",
+        paddingTop:5,
+        paddingLeft:10,
+        fontWeight: '600',
+         textAlign:"left",
+          width: '100%',
+          height: 50,
+          backgroundColor: '#F6F6F6',
+          borderRadius: 10,
+          alignItems: 'center',
+          justifyContent: 'center',
+          borderWidth: 1,
+          borderColor: '#E8E8E8',
+          fontSize:30,
+          marginBottom:10
+          }} >{car.post}
+          </Text>
+      </TouchableOpacity>
+))} 
+      </View>
+
+
+         )}
         </View>
-          )
+        )
         }
       </View>
     </>
   );
 }
 
-// const mapDispatchToProps = (dispatch) => ({
-//   loadSite: (data) => dispatch(loadSite(data)),
-// });
-
-// export default connect(null, mapDispatchToProps)(Dashbord);
 
 export default Dashbord;

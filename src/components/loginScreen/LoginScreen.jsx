@@ -4,9 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { styles } from '../../styles/customStyles';
 import { IMAGES } from '../../../assets/index';
 import { ModalS } from '../ModalS';
-
 import PhoneInput from 'react-native-phone-number-input';
-import { registration } from './../users/users';
 import { useSelector, useDispatch } from 'react-redux';
 import { login } from '../users/users';
 
@@ -29,8 +27,7 @@ export function LoginScreen({ navigation }) {
   const TelefonPush=()=>{
     dispatch(login(telefon.substring(1),{navigation}))
     console.log('123')
-    
-  }
+  };
 
 
   return (
@@ -55,13 +52,6 @@ export function LoginScreen({ navigation }) {
         withShadow
         onChangeFormattedText={setTelefon}
         /> 
-         {/* <TextInput
-          value={telefon}
-          onChangeText={setTelefon}
-          placeholder="Номер мобильного телефона"
-          style={styles.test_input}
-          keyboardType={'phone-pad'}
-        />  */}
         <Text
           style={styles.text_field_description}
         >
@@ -74,7 +64,6 @@ export function LoginScreen({ navigation }) {
       >
         <Text
           style={styles.enter_btn}
-          // onPress={() => navigation.navigate('EnterSmsScreen')}
           onPress={TelefonPush}
           
         >Войти

@@ -25,15 +25,11 @@ export function RegistrationScreen({ navigation }) {
   };
 
 
-
   const TelefonPush=()=>{
    registration(telefon.substring(1),name,{navigation})
 
   
   }
-  
-  // .replace(/\s/g, '')
-
   
   return (
     <View style={styles.container}>
@@ -82,8 +78,7 @@ export function RegistrationScreen({ navigation }) {
       >
         <Text
           style={styles.enter_btn}
-          // onPress={() => navigation.navigate('EnterSmsScreen')}
-          // onPress={TelefonPush}
+
           onPress={TelefonPush}
           
         >Войти
